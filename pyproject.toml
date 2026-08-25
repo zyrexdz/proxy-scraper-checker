@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "zyre-proxy-scraper"
+version = "2.0.0"
+description = "Scrapes and checks 1.7M+ free HTTP, SOCKS4, and SOCKS5 proxies from 235 live APIs."
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [
+    { name = "zyrexdz" }
+]
+dependencies = [
+    "requests>=2.31.0",
+    "PySocks>=1.7.1",
+    "rich>=13.7.0",
+    "urllib3>=2.0.0",
+]
