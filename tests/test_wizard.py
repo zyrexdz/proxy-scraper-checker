@@ -10,10 +10,9 @@ from __future__ import annotations
 import io
 from pathlib import Path
 
-import pytest
+from rich.console import Console
 
 from proxy_scraper.protocols import Protocol
-from rich.console import Console
 from proxy_scraper.wizard import run_wizard, wizard_to_namespace
 
 

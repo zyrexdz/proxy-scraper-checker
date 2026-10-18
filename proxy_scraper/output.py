@@ -15,12 +15,10 @@ from __future__ import annotations
 
 import csv
 import json
-from dataclasses import asdict
+from collections.abc import Iterable
 from datetime import date
 from pathlib import Path
-from typing import Iterable
 
-from .anonymity import Anonymity
 from .checker import CheckResult
 from .parser import Proxy
 from .protocols import Protocol

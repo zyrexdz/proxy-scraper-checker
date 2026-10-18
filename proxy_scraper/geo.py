@@ -14,7 +14,7 @@ Failed lookups (rate-limited, private IP, malformed) are silently dropped.
 from __future__ import annotations
 
 import asyncio
-from typing import Iterable
+from collections.abc import Iterable
 
 import aiohttp
 

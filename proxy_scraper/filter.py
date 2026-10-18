@@ -16,8 +16,9 @@ here, only removing clearly-bad ones.
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Awaitable, Callable, Iterable
+from typing import Callable
 
 import aiohttp
 from aiohttp_socks import ProxyConnector
@@ -84,14 +85,13 @@ async def _test_one(
             from aiohttp import TCPConnector
 
             connector = TCPConnector()
-        async with aiohttp.ClientSession(connector=connector) as session:
-            async with session.get(
-                site.url,
-                timeout=aiohttp.ClientTimeout(total=timeout, connect=min(4.0, timeout)),
-                allow_redirects=True,
-                headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"},
-            ) as resp:
-                return not site.is_blocked(resp.status)
+        async with aiohttp.ClientSession(connector=connector) as session, session.get(
+            site.url,
+            timeout=aiohttp.ClientTimeout(total=timeout, connect=min(4.0, timeout)),
+            allow_redirects=True,
+            headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"},
+        ) as resp:
+            return not site.is_blocked(resp.status)
     except (aiohttp.ClientError, asyncio.TimeoutError, OSError, Exception):
         return False
 

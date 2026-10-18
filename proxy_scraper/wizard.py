@@ -9,6 +9,7 @@ Invoked by default when ``main.py`` runs with no flags. Bypass with
 
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
 
 from rich.box import HEAVY, ROUNDED
@@ -18,8 +19,8 @@ from rich.prompt import Confirm, FloatPrompt, IntPrompt, Prompt
 from rich.table import Table
 from rich.text import Text
 
-from .cli import PRESETS
 from . import __version__
+from .cli import PRESETS
 from .protocols import ALL_PROTOCOLS, Protocol
 from .ui import CYAN, GREEN, MUTED, RED, YELLOW
 
@@ -172,7 +173,7 @@ def _prompt_filter(console: Console) -> tuple[bool, list[str]]:
     table.add_column("#", justify="right", style=f"bold {CYAN}", width=3)
     table.add_column("Option")
     table.add_row("1", "skip filter")
-    table.add_row("2", f"quick — Cloudflare, Discord, Google")
+    table.add_row("2", "quick — Cloudflare, Discord, Google")
     table.add_row("3", f"full — all {len(keys)} targets (slower)")
     table.add_row("4", "custom — pick targets")
     console.print(table)
@@ -202,9 +203,8 @@ def _prompt_filter(console: Console) -> tuple[bool, list[str]]:
         part = part.strip()
         if part.isdigit():
             idx = int(part) - 1
-            if 0 <= idx < len(keys):
-                if keys[idx] not in selected:
-                    selected.append(keys[idx])
+            if 0 <= idx < len(keys) and keys[idx] not in selected:
+                selected.append(keys[idx])
     return True, (selected or ["Cloudflare", "Discord", "Google"])
 
 
@@ -292,10 +292,8 @@ def run_wizard(console: Console, *, default_out_dir: Path | None = None) -> dict
     }
 
 
-def wizard_to_namespace(plan: dict) -> object:
+def wizard_to_namespace(plan: dict) -> argparse.Namespace:
     """Convert a wizard plan dict into an argparse.Namespace compatible with cmd_*."""
-    import argparse
-
     ns = argparse.Namespace()
     ns.no_color = False
     ns.non_interactive = True

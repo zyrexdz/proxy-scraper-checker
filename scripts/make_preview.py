@@ -108,14 +108,14 @@ def _wrap_text(draw, text, x, y, max_w, font):
 
 def render_banner() -> Image.Image:
     img, draw = _img()
-    # Outer banner box.
-    _panel(draw, (40, 70, W - 40, 145), border=HEADER_BORDER, fill=PANEL)
-    _txt(draw, (75, 90), "ZYRE  PROXY SCRAPER", font=F_BIG, fill=GREEN)
+    # Outer banner box — height sized to fit three lines on the right side.
+    _panel(draw, (40, 60, W - 40, 160), border=HEADER_BORDER, fill=PANEL)
+    _txt(draw, (75, 85), "ZYRE  PROXY SCRAPER", font=F_BIG, fill=GREEN)
     _txt(draw, (75, 130), "v3.0.0", fill=MUTED)
     # Subtitle / stats on the right.
-    _txt(draw, (W - 360, 90), "150 sources", fill=FG, font=F)
-    _txt(draw, (W - 360, 115), "HTTP / SOCKS4 / SOCKS5", fill=MUTED, font=F_SM)
-    _txt(draw, (W - 360, 138), "async I/O + multi-judge", fill=CYAN, font=F_SM)
+    _txt(draw, (W - 360, 78), "150 sources", fill=FG, font=F)
+    _txt(draw, (W - 360, 103), "HTTP / SOCKS4 / SOCKS5", fill=MUTED, font=F_SM)
+    _txt(draw, (W - 360, 130), "async I/O + multi-judge", fill=CYAN, font=F_SM)
     return img
 
 
@@ -186,7 +186,7 @@ def render_wizard_step(step: str, *, picked: str = "") -> Image.Image:
             ("Preset",       "balanced (timeout 6.0s, max ping 3500ms)"),
             ("Concurrency",  "300 threads"),
             ("Filter",       "off"),
-            ("Output dir",   "."),
+            ("Output dir",   "./proxies"),
         ]
         for label, val in rows:
             _txt(draw, (body_x, body_y), label, fill=CYAN, font=F)
@@ -221,8 +221,8 @@ def render_dashboard(
     _txt(draw, (W - 175, 30), f"{cpm:,} cpm", fill=YELLOW, font=F)
 
     # ----- Body split -----
-    body_top = 76
-    body_bot = H - 110
+    body_top = 80
+    body_bot = 430
     body_left_x = 20
     body_right_x = W - 270
 
@@ -259,12 +259,12 @@ def render_dashboard(
         y += 36
 
     # ----- Footer events -----
-    foot_top = H - 96
-    _panel(draw, (20, foot_top, W - 20, H - 20), border=PANEL_BORDER, fill=PANEL)
-    _txt(draw, (35, foot_top + 8), " Events", font=F, fill=GREEN)
-    y = foot_top + 36
-    # Show 6 most recent events.
-    for kind, msg in (events or [])[-6:]:
+    foot_top = 440
+    _panel(draw, (20, foot_top, W - 20, H - 15), border=PANEL_BORDER, fill=PANEL)
+    _txt(draw, (35, foot_top + 10), " Events", font=F, fill=GREEN)
+    y = foot_top + 38
+    # Show up to 5 most recent events so the panel contains them cleanly.
+    for kind, msg in (events or [])[-5:]:
         sym_color = (GREEN if kind == "ok" else (RED if kind == "fail" else CYAN))
         sym = "+" if kind == "ok" else ("x" if kind == "fail" else "*")
         _txt(draw, (45, y), sym, fill=sym_color, font=F)
@@ -277,8 +277,8 @@ def render_dashboard(
 
 def render_done(*, total_working: int, saved_files: list[str]) -> Image.Image:
     """Final frame: dashboard at 100% with a 'Saved' row across the bottom."""
-    # Render the dashboard at 100% directly into an image, then crop the
-    # events footer short and add a green 'Saved' line in its place.
+    # Render the dashboard at 100% directly into an image, then fully clear
+    # the events footer area and draw a 'Saved' banner in its place.
     img, draw = _img()
     img.paste(render_dashboard(
         pct=100.0,
@@ -288,16 +288,17 @@ def render_done(*, total_working: int, saved_files: list[str]) -> Image.Image:
         hit=7.2,
         recent=7.5,
         cpm=4200,
-        events=[("ok", "complete"), ("ok", "discord.com -> 200"), ("ok", "github.com -> 200")],
+        events=[],
         phase="DONE",
     ), (0, 0))
-    # Overwrite the empty 'Events' footer with a 'Saved' banner.
-    saved_y = H - 96
-    _panel(draw, (20, saved_y, W - 20, H - 20), border=HEADER_BORDER, fill=PANEL)
-    _txt(draw, (35, saved_y + 8), "[done]", fill=GREEN, font=F_BIG)
-    _txt(draw, (150, saved_y + 13), f"{total_working:,} working proxies from 150 sources", fill=FG, font=F)
-    _txt(draw, (35, saved_y + 50), "Saved:", fill=GREEN, font=F)
-    _txt(draw, (130, saved_y + 50), ", ".join(saved_files), fill=FG, font=F_SM)
+    # Overwrite the 'Events' footer with a clean 'Saved' banner.
+    saved_y = 440
+    _panel(draw, (20, saved_y, W - 20, H - 15), border=HEADER_BORDER, fill=PANEL)
+    _txt(draw, (35, saved_y + 10), "[done]", fill=GREEN, font=F_BIG)
+    _txt(draw, (150, saved_y + 18), f"{total_working:,} working proxies from 150 sources", fill=FG, font=F)
+    _txt(draw, (35, saved_y + 65), "Saved:", fill=GREEN, font=F)
+    truncated = _wrap_text(draw, ", ".join(saved_files), 130, saved_y + 65, W - 160, F_SM)
+    _txt(draw, (130, saved_y + 67), truncated, fill=FG, font=F_SM)
     return img
 
 

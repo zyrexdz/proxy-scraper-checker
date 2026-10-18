@@ -14,8 +14,9 @@ from __future__ import annotations
 
 import asyncio
 import time
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Awaitable, Callable, Iterable
+from typing import Callable
 
 import aiohttp
 from aiohttp_socks import ProxyConnector
@@ -75,10 +76,6 @@ class CheckResult:
         }
 
 
-def proxy_url(proxy: Proxy, protocol: Protocol) -> str:
-    return proxy.to_url(protocol)
-
-
 def _connector_for(protocol: Protocol, proxy: Proxy) -> aiohttp.BaseConnector:
     """Build an aiohttp connector that routes through the given proxy."""
     url = proxy_url(proxy, protocol)
@@ -107,15 +104,14 @@ async def _sample_judge(
     start = time.perf_counter()
     try:
         connector = _connector_for(protocol, proxy)
-        async with aiohttp.ClientSession(connector=connector) as session:
-            async with session.get(
-                judge_url,
-                timeout=aiohttp.ClientTimeout(total=timeout, connect=min(3.0, timeout)),
-                allow_redirects=False,
-            ) as resp:
-                if resp.status != 200:
-                    return float("inf")
-                await resp.read()
+        async with aiohttp.ClientSession(connector=connector) as session, session.get(
+            judge_url,
+            timeout=aiohttp.ClientTimeout(total=timeout, connect=min(3.0, timeout)),
+            allow_redirects=False,
+        ) as resp:
+            if resp.status != 200:
+                return float("inf")
+            await resp.read()
     except (asyncio.TimeoutError, aiohttp.ClientError, OSError, ValueError):
         return float("inf")
     finally:

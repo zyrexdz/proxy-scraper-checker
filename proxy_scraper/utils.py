@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import os
 import sys
 
@@ -18,17 +19,13 @@ def raise_fd_limit_windows() -> None:
     """
     if sys.platform != "win32":
         return
-    try:
+    with contextlib.suppress(OSError, ImportError):
         import ctypes
 
         windll = ctypes.WinDLL("ws2_32", use_last_error=True)
         # _setmaxstdio: bump CRT-level FILE* limit (0..2048 in modern CRT).
-        try:
+        with contextlib.suppress(AttributeError):
             windll._setmaxstdio(2048)
-        except AttributeError:
-            pass
-    except (OSError, ImportError):
-        pass
 
 
 def cpu_count() -> int:

@@ -25,14 +25,14 @@ Example config.toml::
 from __future__ import annotations
 
 import os
-from dataclasses import dataclass, field
-from pathlib import Path
-from typing import Any
 
 # We're avoiding a `tomllib`/`tomli` dependency to keep the requirement set
 # small. Our TOML needs are trivial (flat key=value pairs), and a minimal
 # parser is fine for the value surface.
 import re
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any
 
 _KV_RE = re.compile(r'^\s*([A-Za-z_][\w.-]*)\s*=\s*(.+?)\s*$')
 _TABLE_RE = re.compile(r"^\s*\[([A-Za-z_][\w.-]*)\]\s*$")
@@ -167,7 +167,7 @@ class Config:
     types: list[str] = field(default_factory=lambda: ["http", "socks4", "socks5"])
 
     @classmethod
-    def load(cls, path: Path | None = None) -> "Config":
+    def load(cls, path: Path | None = None) -> Config:
         """Load from a TOML file (if provided and exists), then overlay env vars."""
         data: dict[str, Any] = {}
         path = Path(path) if path else Path("config.toml")

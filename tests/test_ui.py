@@ -104,11 +104,11 @@ def test_summary_table_markup_balanced() -> None:
     with ``[/]``, NOT with ``[/bold]`` — those are mismatched and Rich
     raises ``MarkupError`` while measuring column widths.
     """
-    from proxy_scraper.ui import GREEN
-    from proxy_scraper.cli import _print_summary
+    from proxy_scraper.anonymity import Anonymity
+
     # Build a fake CheckResult just to exercise the markup path.
     from proxy_scraper.checker import CheckResult
-    from proxy_scraper.anonymity import Anonymity
+    from proxy_scraper.cli import _print_summary
     from proxy_scraper.parser import Proxy
     from proxy_scraper.protocols import Protocol
 

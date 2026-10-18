@@ -17,9 +17,9 @@ from __future__ import annotations
 
 import json
 import re
+from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 from ipaddress import IPv4Address
-from typing import Iterable, Iterator
 
 from .protocols import Protocol
 
@@ -68,7 +68,7 @@ class Proxy:
             return f"{self.user}:{self.passwd}@{self.ip}:{self.port}"
         return f"{self.ip}:{self.port}"
 
-    def with_auth(self, user: str = "", passwd: str = "") -> "Proxy":
+    def with_auth(self, user: str = "", passwd: str = "") -> Proxy:
         return Proxy(self.ip, self.port, user, passwd)
 
     @property
@@ -231,5 +231,5 @@ def _filter_by_protocol(
 
 def parse_file(path: str, *, expected: Protocol | None = None) -> set[Proxy]:
     """Read a file and parse it. Encoding-tolerant."""
-    with open(path, "r", encoding="utf-8", errors="ignore") as fh:
+    with open(path, encoding="utf-8", errors="ignore") as fh:
         return parse(fh.read(), expected=expected)

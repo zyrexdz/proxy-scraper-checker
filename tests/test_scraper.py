@@ -10,11 +10,9 @@ correctly handles:
 
 from __future__ import annotations
 
-import asyncio
-
 import pytest
 
-from proxy_scraper.checker import CheckResult, check_all, _sample_judge
+from proxy_scraper.checker import check_all
 from proxy_scraper.parser import Proxy
 from proxy_scraper.protocols import Protocol
 

@@ -13,11 +13,11 @@ import sys
 import time
 from collections import deque
 from dataclasses import dataclass
-from typing import Callable
 
 from rich.align import Align
 from rich.box import ROUNDED
 from rich.console import Console, Group
+from rich.layout import Layout
 from rich.live import Live
 from rich.panel import Panel
 from rich.progress import (
@@ -67,7 +67,7 @@ def _enable_windows_vt() -> bool:
     if sys.platform != "win32":
         return True
     try:
-        kernel32 = ctypes.windll.kernel32  # type: ignore[attr-defined]
+        kernel32 = ctypes.windll.kernel32
         STD_OUTPUT_HANDLE = -11
         STD_ERROR_HANDLE = -12
         ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004
@@ -290,7 +290,8 @@ class SimpleProgress:
         self._print_line(done, extra, force=False)
 
     def _print_line(self, done: int, extra: str, *, force: bool) -> None:
-        import time as _t, sys as _sys
+        import sys as _sys
+        import time as _t
         pct = (done / self.total * 100) if self.total else 0.0
         elapsed = _t.time() - self._start_ts if self._start_ts else 0.0
         bar = self._ascii_bar(pct)
@@ -315,7 +316,8 @@ class SimpleProgress:
         if self._finished:
             return
         self._finished = True
-        import sys as _sys, time as _t
+        import sys as _sys
+        import time as _t
         elapsed = _t.time() - self._start_ts if self._start_ts else 0.0
         if self._tty:
             # Clear the live line, then print a clean one.
@@ -329,7 +331,7 @@ class SimpleProgress:
         console.print(f"  [bold {self.color}]{summary}[/]")
 
 
-def _bar(pct: float, width: int = 30) -> str:
+def _ascii_progress_bar(pct: float, width: int = 30) -> str:
     """Plain-ASCII progress bar (no Unicode, no escape codes)."""
     filled = int(width * pct / 100)
     return "[" + "=" * filled + " " * (width - filled) + "]"
@@ -397,9 +399,7 @@ class RichTUIDashboard:
         dw = w_new - w_old
         return (dw / dc * 100.0) if dc > 0 else 0.0
 
-    def render(self) -> "Layout":  # type: ignore[name-defined]
-        from rich.layout import Layout
-
+    def render(self) -> Layout:
         pct = (self._checked / self.total * 100) if self.total else 0.0
         elapsed = max(time.time() - self._started_at, 1e-6)
         cpm = self._checked / elapsed * 60.0
@@ -433,7 +433,7 @@ class RichTUIDashboard:
         from rich.align import Align
         from rich.console import Group
         bar_text = Text()
-        bar_text.append(_bar(pct, width=46), style=f"bold {GREEN}")
+        bar_text.append(_ascii_progress_bar(pct, width=46), style=f"bold {GREEN}")
         bar_text.append(f"  {pct:5.1f}%", style="bold white")
         lines = Text.from_markup(
             f"  [bold white]{self._checked:,}[/] of [bold white]{self.total:,}[/] checked"
@@ -520,7 +520,6 @@ class RichTuiRunner:
 
     async def drive(self, check_coro) -> list:
         """Run ``check_coro`` (an awaitable) while driving the Live display."""
-        from rich.live import Live
 
         async def runner() -> list:
             results = await check_coro
@@ -579,7 +578,8 @@ class SimpleDashboard:
         self._print(force=False)
 
     def _print(self, *, force: bool) -> None:
-        import sys as _sys, time as _t
+        import sys as _sys
+        import time as _t
         pct = (self._checked / self.total * 100) if self.total else 0.0
         elapsed = _t.time() - self._start if self._start else 0.0
         cpm = self._checked / max(elapsed, 1e-6) * 60.0
@@ -618,7 +618,8 @@ class SimpleDashboard:
         if self._done:
             return
         self._done = True
-        import sys as _sys, time as _t
+        import sys as _sys
+        import time as _t
         elapsed = _t.time() - self._start if self._start else 0.0
         if self._tty:
             _sys.stderr.write("\r" + " " * self._last_len + "\r")

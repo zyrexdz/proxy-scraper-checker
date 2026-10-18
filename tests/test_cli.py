@@ -6,7 +6,6 @@ doesn't crash. They do NOT trigger a real scrape or check (no network).
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 
 import pytest

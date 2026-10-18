@@ -75,10 +75,11 @@ class Anonymity(str, Enum):
 async def _direct_own_ip() -> str:
     """Return our real outbound IP. Best-effort; empty on failure."""
     try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get("http://api.ipify.org", timeout=aiohttp.ClientTimeout(total=5)) as resp:
-                if resp.status == 200:
-                    return (await resp.text()).strip()
+        async with aiohttp.ClientSession() as session, session.get(
+            "http://api.ipify.org", timeout=aiohttp.ClientTimeout(total=5)
+        ) as resp:
+            if resp.status == 200:
+                return (await resp.text()).strip()
     except (aiohttp.ClientError, asyncio.TimeoutError, Exception):
         pass
     return ""
@@ -92,17 +93,16 @@ async def _headers_via_proxy(proxy: Proxy, protocol: Protocol) -> dict[str, str]
 
             connector = TCPConnector()
         else:
-            connector = ProxyConnector.from_url(_proxy_url(proxy, protocol))
-        async with aiohttp.ClientSession(connector=connector) as session:
-            async with session.get(
-                _HEADER_PROBE_URL,
-                timeout=aiohttp.ClientTimeout(total=8.0, connect=4.0),
-                allow_redirects=False,
-            ) as resp:
-                if resp.status != 200:
-                    return None
-                data = await resp.json()
-                return {k.lower(): str(v) for k, v in (data.get("headers") or {}).items()}
+            connector = ProxyConnector.from_url(proxy_url(proxy, protocol))
+        async with aiohttp.ClientSession(connector=connector) as session, session.get(
+            _HEADER_PROBE_URL,
+            timeout=aiohttp.ClientTimeout(total=8.0, connect=4.0),
+            allow_redirects=False,
+        ) as resp:
+            if resp.status != 200:
+                return None
+            data = await resp.json()
+            return {k.lower(): str(v) for k, v in (data.get("headers") or {}).items()}
     except (aiohttp.ClientError, asyncio.TimeoutError, OSError, ValueError, Exception):
         return None
 

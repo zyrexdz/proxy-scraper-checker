@@ -14,34 +14,30 @@ from __future__ import annotations
 import argparse
 import asyncio
 import sys
-import time
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
 
 import aiohttp
 
 from . import __version__
 from .checker import CheckResult, check_all, enrich_results
 from .config import Config
-from .filter import DEFAULT_TARGETS, filter_targets, targets_by_names
+from .filter import filter_targets, targets_by_names
 from .output import write_all
 from .parser import Proxy, parse_file
 from .protocols import ALL_PROTOCOLS, Protocol
-from .scraper import scrape as scrape_sources
 from .sources import SourceHealthBook, sources_by_protocol
 from .ui import (
     GREEN,
     MUTED,
     RED,
-    YELLOW,
     SimpleDashboard,
     SimpleProgress,
     banner,
     console,
     summary_table,
 )
-from .utils import cpu_count, raise_fd_limit_windows
-
+from .utils import raise_fd_limit_windows
 
 # ---------------------------------------------------------------------------
 # Quality presets — exposed as CLI choices for ``--preset``.
@@ -160,9 +156,9 @@ async def _do_scrape(
 
     sources = tuple(src for srcs in by_proto.values() for src in srcs)
 
-    from .sources import Source
     from .parser import parse as parse_payload
     from .scraper import _pick_headers
+    from .sources import Source
 
     sem = asyncio.Semaphore(config.scraper.concurrency)
     out: dict[Protocol, set[Proxy]] = {p: set() for p in protocols}
@@ -230,7 +226,6 @@ async def _do_check(
     if not flat:
         return []
 
-    cores = cpu_count()
     label = ", ".join(sorted(p.value for p in scraped))
 
     if not show_dashboard:
@@ -287,7 +282,6 @@ async def _do_check(
         return await runner.drive(check_with_events())
 
     # Plain-ASCII path (CI / piped / non-TTY capture)
-    from .ui import SimpleDashboard
 
     dashboard = SimpleDashboard(
         total=len(flat),
@@ -512,7 +506,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     #   * AND we're not already mid-pipeline (no input_file given)
     interactive_ok = (
         not args.non_interactive
-        and not cmd == "check"  # check requires a file path
+        and cmd != "check"  # check requires a file path
     )
 
     if interactive_ok:

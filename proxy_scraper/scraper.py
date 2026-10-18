@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import asyncio
 import random
-from typing import Iterable
+from collections.abc import Iterable
 
 import aiohttp
 

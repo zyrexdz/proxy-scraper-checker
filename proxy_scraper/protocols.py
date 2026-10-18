@@ -42,7 +42,7 @@ class Protocol(str, Enum):
         }[self]
 
     @classmethod
-    def parse(cls, raw: str) -> "Protocol":
+    def parse(cls, raw: str) -> Protocol:
         """Parse a user-provided string (``"http"``, ``"socks5"``, ``"HTTPS"``).
 
         Whitespace and case are ignored. Raises ``ValueError`` for unknown input.
